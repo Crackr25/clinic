@@ -196,6 +196,14 @@ $getProgname = DB::table('teacher')
                         </p>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="/clinic/patientdashboard/index"  id="dental" class="nav-link {{Request::url() == url('/clinic/records/index') ? 'active' : ''}}">
+                        <i class="nav-icon fa fa-user-md"></i>
+                        <p>
+                            Create Appointment 
+                        </p>
+                    </a>
+                </li>
             </nav>
       <!-- /.sidebar-menu -->
     </div>

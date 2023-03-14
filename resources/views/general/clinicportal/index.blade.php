@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="{{asset('plugins/fullcalendar-timegrid/main.min.css')}}">
 <link rel="stylesheet" href="{{asset('plugins/fullcalendar-bootstrap/main.min.css')}}">
 <link rel="stylesheet" href="{{asset('plugins/fullcalendar-interaction/main.min.css')}}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 <!-- SweetAlert2 -->
 <link rel="stylesheet" href="{{asset('plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css')}}">
 <!-- Toastr -->
@@ -49,6 +50,25 @@
         height: 100%;
         padding: 0;
     }
+
+      .list-display li {
+        margin-bottom:.4rem;
+        font-size:1.1rem;
+      }
+      .list-checkmarks {
+        padding-left:1.5rem;
+      }
+      .list-checkmarks li {
+        list-style-type:none;
+        padding-left:1rem;
+      }
+      .list-checkmarks li:before {    
+      font-family: 'FontAwesome';
+      content: "\f00c";
+      margin:0 10px 0 -28px;
+      color: #17aa1c;
+      }
+
     @media (min-width: 576px)
     {
         #createappointment .modal-dialog {
@@ -536,6 +556,46 @@
                       <small>{{date('h:i A', strtotime($myappointment->atime))}}</small>
                     @endif
                     <br/>
+                    @if($myappointment->admitted == '0')
+                      <label>Available:</label>
+                    @else
+                      <label>Assigned Doctor:</label>
+                    @endif
+                    @php
+                    $time = $myappointment->atime;
+                    $doctors = DB::table('clinic_schedavailability')
+                                ->where('deleted', 0)
+                                ->where('scheddate', $myappointment->adate)
+                                ->whereRaw('? between timefrom and timeto', [$time])
+                                ->get();
+                    $experiences = DB::table('clinic_experiences')
+                                ->where('deleted','0')
+                                ->orderBy('description')
+                                ->get();
+                    @endphp
+                    @if(count($doctors) > 0)
+                    @foreach($doctors as $doctor)
+                          @php
+                          $name = DB::table('users')
+                                    ->where('id', $doctor->createdby)
+                                    ->first();
+                          @endphp
+                          <ul class="list-display list-checkmarks">
+                            <li>Dr. {{$name->name}}</li> </ul>
+                    @endforeach
+                    @else
+                      <small>No Doctor Available</small>
+                    @endif
+                    {{-- @if($doctors)
+                    @
+                      <small>Available: Dr. {{$name->name}}</small>
+                    <br/>
+                    @else
+                      <small>No Doctor Available</small>
+                      <br/>
+
+                    @endif --}}
+                    <br/>
                     <label>Status:</label>
                     @if($myappointment->admitted == '1')
                       <span class="badge badge-success">Approved</span>
@@ -570,10 +630,10 @@
             <span class="info-box-icon"><i class="fas fa-share"></i></span>
   
             <div class="info-box-content">
-              <span class="info-box-text">Appointment Applied</span>
-              <span class="info-box-number">5,200</span>
+              <span class="info-box-text">Appointment Applied {{count($myappointments)}}</span>
+              {{-- <span class="info-box-number">{{count($myappointments)}}</span> --}}
             </div>
-            <!-- /.info-box-content -->
+            {{-- <!-- /.info-box-content -->
           </div>
           <div class="card">
             <div class="card-header">
@@ -634,16 +694,16 @@
                     <span class="product-description">
                       PlayStation 4 500GB Console (PS4)
                     </span>
-                  </div>
+                  </div> --}}
                 </li>
                 <!-- /.item -->
               </ul>
             </div>
             <!-- /.card-body -->
-            <div class="card-footer text-center">
+            {{-- <div class="card-footer text-center">
               <a href="javascript:void(0)" class="uppercase">View All Products</a>
             </div>
-            <!-- /.card-footer -->
+            <!-- /.card-footer --> --}}
           </div>
         </div>
       </div>
@@ -752,21 +812,41 @@
   <!-- /.modal-dialog -->
 </div>
 <div class="modal fade" id="modal-editappointment">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4 class="modal-title">Edit Appointment</h4>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <p>One fine body&hellip;</p>
-      </div>
-      <div class="modal-footer justify-content-between">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Edit Appointment</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+              <div class="row">
+                  <div class="col-md-8 mb-2">
+                        <label>Description <span class="text-danger">*</span></label><br/>
+                        <input type="text" class="form-control" id="description">
+                            
+                        </select>
+                  </div>
+                  <div class="col-md-12 mt-2">
+                      <label>Time Slot</label><br/>
+                      <input type="time" class="form-control" id="timeslot">
+                  </div>
+              </div>
+          </div>
+          <div class="modal-footer">
+                  <div class="col-md-4 text-left">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" id="btn-close-editmedication">Close</button>
+                </div>
+                  <div class="col-md-8 text-right">
+                    <button type="button" class="btn btn-primary" id="btn-submit-editappointment" data-id=""><i class="fa fa-edit"></i> Save Changes</button>
+                  </div>
+          </div>
+        </div>
+      {{-- <div class="modal-footer justify-content-between">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         <button type="button" class="btn btn-primary">Save changes</button>
-      </div>
+      </div> --}}
     </div>
     <!-- /.modal-content -->
   </div>
@@ -802,13 +882,14 @@
     $(document).ready(function(){
         $('#btn-addappointment').on('click', function(){
           $('#createappointment').modal('show')
+
         })
         var date = new Date();
         var today = date.getDate();
         // Set click handlers for DOM elements
         $(".right-button").click({date: date}, next_year);
         $(".left-button").click({date: date}, prev_year);
-        $(".month").click({date: date}, month_click);
+        $(".month").click({date: date}, month_click); 
         $("#add-button").click({date: date}, new_event);
         // Set current month as active
         $(".months-row").children().eq(date.getMonth()).addClass("active-month");
@@ -833,6 +914,8 @@ function init_calendar(date) {
     var day_count = days_in_month(month, year);
     var row = $("<tr class='table-row'></tr>");
     var today = date.getDate();
+
+
     // Set date to 1 to find the first day of the month
     date.setDate(1);
     var first_day = date.getDay();
@@ -923,7 +1006,38 @@ function prev_year(event) {
 
 // Event handler for clicking the new event button
 function new_event(event) {
+  var currentdate = new Date();
+
     // if a date isn't selected then do nothing
+   var day = parseInt($(".active-date").html());
+   var date = event.data.date.getDate() + day - 1;
+   var month = event.data.date.getMonth() *1000;
+   var year = event.data.date.getFullYear() ;
+   var date2 = currentdate.getDate();
+   var month2 = currentdate.getMonth() *1000;
+   var year2 = currentdate.getFullYear();
+   var num1 = date+month+year;
+   var num2 = date2+month2+year2;
+   var check = 0;
+
+   if(year > year2){
+       check = 1;
+   }
+  console.log(num1);
+  console.log(num2);
+  console.log(typeof check);
+  if(check == 0){
+  if (num1 < num2 || year < year2) {
+      Swal.fire({
+                    type: 'error',
+                    title: 'Oops...',
+                    text: 'Please ensure the selected date is not in the past.'
+                    
+                    })
+    return;
+    }
+    }
+
     if($(".active-date").length===0)
         return;
     // remove red error input on click
@@ -983,7 +1097,8 @@ function new_event(event) {
                   toastr.warning('You already submitted an appointment for the selected date!','Pending Appoinment')
                 }else{
                   toastr.success('You successfully submitted an appointment for the selected date!','Submit Appoinment')
-                  $('#close-button').click()
+                  $('#close-button').click();
+                  window.location.reload();
                 }
               }
             })
@@ -1315,8 +1430,72 @@ const months = [
           })
       })
       $('.btn-editappointment').on('click', function(){
-        $('#modal-editappointment').modal('show');
+                $('#modal-editappointment').modal('show');
+                var id = $(this).attr('data-id');
+                $('#btn-submit-editappointment').attr('data-id',id);
+                
+            })
+
+                $('#btn-submit-editappointment').on('click', function(){
+                var id = $(this).attr('data-id');
+                var description  = $('#description').val();
+                var timeslot =$('#timeslot').val();
+                console.log(id); 
+                console.log(description);
+                console.log(timeslot);
+                
+                var checkvalidation = 0;
+
+                if(description.replace(/^\s+|\s+$/g, "").length == 0)
+                {
+                    checkvalidation=1;
+                    $('#description').css('border','1px solid red')
+                }else{
+                    $('#description').removeAttr('style')
+                }
+                if(timeslot.replace(/^\s+|\s+$/g, "").length == 0)
+                {
+                    checkvalidation=1;
+                    $('#timeslot').css('border','1px solid red')
+                }else{
+                    $('#timeslot').removeAttr('style')
+                }
+
+
+                if(checkvalidation == 0)
+                {
+                    $.ajax({
+                        url: '/clinic/patientdashboard/editappointments',
+                        type: 'GET',
+                        dataType: 'json',
+                        data:{
+                            id          : id,
+                            description : description,
+                            timeslot    : timeslot,
+                        }, success:function(data){
+                            if(data == 1)
+                            {
+                                Toast.fire({
+                                    type: 'success',
+                                    title: 'Updated successfully!'
+                                })
+                                $('#btn-close-editmedication').click()
+                                $('.form-container input,textarea').val("")
+                                window.location.reload();
+
+                            }else{
+                                Toast.fire({
+                                    type: 'error',
+                                    title: 'Something went wrong!'
+                                })
+                            }
+                            window.location.reload();
+                        }
+                    })
+                }
+                
+            })
       })
-    })
+
 </script>
 @endsection

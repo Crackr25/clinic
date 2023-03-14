@@ -6323,6 +6323,7 @@ Route::middleware([ 'auth'])->group(function () {
     Route::get('/clinic/patientdashboard/index', 'ClinicControllers\ClinicPatientController@index');
     Route::get('/clinic/patientdashboard/createapp', 'ClinicControllers\ClinicPatientController@createapp');
     Route::get('/clinic/patientdashboard/getappointments', 'ClinicControllers\ClinicPatientController@getappointments');
+    Route::get('/clinic/patientdashboard/editappointments', 'ClinicControllers\ClinicPatientController@updateappointment');
     Route::get('/clinic/patientdashboard/deleteappointment', 'ClinicControllers\ClinicPatientController@deleteappointment');
 
 

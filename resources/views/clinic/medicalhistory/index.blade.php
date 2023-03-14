@@ -52,7 +52,7 @@
         <!-- Default box -->
         <div class="card">
           <div class="card-header">
-              <div class="row">
+            <div class="row">
                 <div class="col-md-5">
                     <label>Search</label>
                     <select class="form-control select2" style="width: 100%;" id="select-user">
@@ -61,16 +61,17 @@
                         @endforeach
                     </select>
                 </div>
-              </div>
-          </div>
-          <div class="card-body p-0">
+            </div>
+
+        </div>
+        <div class="card-body p-0">
             <table class="table table-striped projects text-center">
                 <thead>
                     <tr>
                         <th style="width: 10px;">
                             #
                         </th>
-                        <th style="width: 35%">
+                        <th class="text-left">
                             Patient
                         </th>
                         <th style="width: 30%">
@@ -83,49 +84,54 @@
                             Status
                         </th>
                         <th style="width: 25%">
-                            Appointed
+                            Doctor
                         </th>
                     </tr>
+
                 </thead>
-                <tbody id="resultscontainer">
+                <tbody>
                 </tbody>
             </table>
-          </div>
-          <!-- /.card-body -->
+            <table class="table table-striped projects text-center" id ="resultscontainer">
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+        <!-- /.card-body -->
         </div>
         <!-- /.card -->
     </section>
-    {{-- <div class="modal fade" id="modal-addexperience">
-      <div class="modal-dialog">
+    <div class="modal fade" id="modal-addexperience">
+    <div class="modal-dialog">
         <div class="modal-content">
-          <div class="modal-header">
+        <div class="modal-header">
             <h4 class="modal-title">Add Option</h4>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
+                <span aria-hidden="true">&times;</span>
             </button>
-          </div>
-          <div class="modal-body">
-              <div class="row">
-                  <div class="col-md-12">
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-md-12">
                     <small class="badge badge-danger">Question: Please Check if You Have Experienced Any of the Following:</small>
-                  </div>
-              </div>
-              <div class="row">
-                  <div class="col-md-12">
-                      <label>Option</label><br/>
-                      <input type="text" class="form-control" placeholder="Add option" id="input-addoption"/>
-                  </div>
-              </div>
-          </div>
-          <div class="modal-footer justify-content-between">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Option</label><br/>
+                    <input type="text" class="form-control" placeholder="Add option" id="input-addoption"/>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer justify-content-between">
             <button type="button" class="btn btn-default" data-dismiss="modal" id="btn-closeexperience">Close</button>
             <button type="button" class="btn btn-primary" id="btn-addoption">Add</button>
-          </div>
+        </div>
         </div>
         <!-- /.modal-content -->
-      </div>
-      <!-- /.modal-dialog -->
-    </div> --}}
+    </div>
+    <!-- /.modal-dialog -->
+    </div>
     @endsection
     @section('footerjavascript')
     <script>
@@ -176,7 +182,80 @@
 
             $('#select-user').on('change',function(){
                 var userid   = $(this).val();
-                gethistory(userid)
+                var id = Number(userid);
+                var markdate = '';
+                var name=  jQuery("#select-user").find("option[value='" + jQuery("#select-user").val() + "']").text()
+                var placeholder = '';
+                const tableBody = document.querySelector('#resultscontainer');
+                $('#resultscontainer').empty();
+                $('body').removeClass('swal2-shown');
+                $('body').removeClass('swal2-height-auto');
+                //var tableBody = document.getElementById("resultscontainer").empty;
+                var tableHtml = '';
+                var key = 1;
+                var status = '';
+                $.ajax({
+                    url:'/clinic/medicalhistory/gethistory',
+                            type:'GET',
+                            dataType: 'json',
+                            data: {
+                                id      :  id
+                            },
+                            success:function(data) {
+                                console.log(data);
+                                
+                                for (var i = 0; i < data.length; i++) {
+                                    var date = new Date(Date.parse(data[i].createddatetime));
+                                    var submitdate = date.toLocaleDateString("en-US", {month: "long", year: "numeric", day: "numeric", hour: "numeric", minute: "numeric"});
+                                    
+                                    if (data[i].label == 1)
+                                    {
+                                        status = 'Mark Done';
+                                        var date2 =  new Date(Date.parse(data[i].labeldatetime));
+                                        markdate = date2.toLocaleDateString("en-US", {month: "long", year: "numeric", day: "numeric", hour: "numeric", minute: "numeric"});
+                                    }
+                                    else{
+                                        status = 'Unmark';
+                                        markdate = '';
+                                    }
+                                    if(data[i].lastname =='' || data[i].lastname == null){
+                                        placeholder = 'No Doctor';
+                                    }
+                                    else{
+                                        placeholder = data[i].lastname + ',' + data[i].firstname;
+                                    }
+                                    const tableRow = document.createElement('tr');
+                                    tableRow.innerHTML =`
+                                                    <td style="width: 10px;"><b>${key}</td>
+                                                    <td class="text-left">
+                                                    <a> ${name}</a>
+                                                    <br/>
+                                                    <small class="text-left" style = "font-weight: bold;">
+                                                    <strong class="float-left">Submitted: ${submitdate}</strong>
+                                                    </small>
+                                                    </td>
+                                                    <td style="width: 30%">
+                                                        <a>${data[i].description}</a>
+                                                    </td>
+                                                    <td style="width: 8%" class="text-center">
+                                                        <a>${status}</a>
+                                                        <br/>
+                                                        <small class="text-left>
+                                                        <strong  class="float-left">${markdate}</strong>
+                                                        </small>
+                                                    </td>
+                                                    <td style="width: 25%">${placeholder} </i></td
+                        
+                                    `;
+                                    key+=1;
+                                    tableBody.appendChild(tableRow);
+                                    }
+                
+                            }
+                                
+            })
+
+
             })
             // filter($('#input-daterange').val());
 

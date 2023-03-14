@@ -6,6 +6,7 @@
                         @else
                         <tr style="background-color: #ffc92c6b;">
                         @endif
+                       
                                 <td>
                                     {{$key+1}}
                                 </td>
@@ -52,7 +53,7 @@
                                     @if(count($appointment->doctors)>0)
                                         @if($appointment->admitted == 1)
                                             @foreach($appointment->doctors as $doctor)
-                                                 @if($appointment->docavailabilityid == $doctor->timeid) 
+                                                @if($appointment->docavailabilityid == $doctor->timeid) 
                                                     {{$doctor->lastname}}, {{$doctor->firstname}}
                                                     @if($doctor->available == 0) - Not Available @endif
                                                 @endif
@@ -60,11 +61,24 @@
                                         @else
                                         <select class="form-control form-control-sm select-doctor">
                                             @foreach($appointment->doctors as $doctor)
-                                                <option value="{{$doctor->id}}-{{$doctor->timeid}}">{{$doctor->lastname}}, {{$doctor->firstname}} @if($doctor->available == 0) - Not Available @endif</option>
+                                                <option value="{{$doctor->id}}-{{$doctor->timeid}}">{{$doctor->lastname}}, {{$doctor->firstname}}
+                                                    @if($doctor->available == 1) - Available 
+                                                    @else -Not Available
+                                                </option>
+                                            @endif
                                             @endforeach
                                         </select>
                                         @endif
                                     @endif
+                                    @if($appointment->admitted == 0)
+                                        <td>
+                                        <button type="button" class="btn btn-sm btn-default btn-appointmentadmit" data-id="{{$appointment->id}}"><i class="fa fa-check"></i> Admit</button>
+                                        </td>
+                                    @else
+                                        <td>
+                                        </td>
+                                     @endif
+
 
                                     {{-- @if($appointment->admitted == 1)
                                         @if($appointment->admittedby == auth()->user()->id)
@@ -87,3 +101,26 @@
                             </tr>
                         @endforeach
                     @endif
+
+                <script>
+
+                $(document).ready(function(){    
+                    $('.btn-save').on('click', function(){
+                        var id = $(this).attr('id');
+                        console.log(id);
+
+                        Swal.fire({
+                            title: 'You are going to save this appointment.',
+                            text: 'Would you like to continue?',
+                            type: 'info',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Continue'
+                                })
+
+                        })
+                    });
+
+
+                </script>

@@ -1,5 +1,37 @@
 
-@extends('clinic_nurse.layouts.app')
+@php
+
+      $check_refid = DB::table('usertype')->where('id',Session::get('currentPortal'))->select('refid')->first();
+
+      if(Session::get('currentPortal') == 3){
+            $extend = 'registrar.layouts.app';
+      }else if(auth()->user()->type == 17){
+            $extend = 'superadmin.layouts.app2';
+      }else if(Session::get('currentPortal') == 2){
+            $extend = 'principalsportal.layouts.app2';
+      }else{
+            
+                if($check_refid->refid == 23)
+				{
+					// return view('clinic.index');
+                    $extend = 'clinic.layouts.app';
+				}
+				elseif($check_refid->refid == 24)
+				{
+					// return view('clinic_nurse.index');
+                    $extend = 'clinic_nurse.layouts.app';
+				}
+				elseif($check_refid->refid == 25)
+				{
+					// return view('clinic_doctor.index');
+                    $extend = 'clinic_doctor.layouts.app';
+				}else{
+                  $extend = 'general.defaultportal.layouts.app';
+            }
+      }
+@endphp
+
+@extends($extend)
 
   <!-- Select2 -->
   {{-- <link rel="stylesheet" href="{{asset('plugins/select2/css/select2.min.css')}}">
@@ -27,7 +59,7 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="#">Home</a></li>
-                        <li class="breadcrumb-item active">Complaints</li>
+                        <li class="breadcrumb-item active">Complaintsc</li>
                     </ol>
                 </div><!-- /.col -->
             </div><!-- /.row -->
@@ -566,7 +598,7 @@
                     $('#addmedication-quantity').css('border','1px solid red')
                     Toast.fire({
                                         type: 'error',
-                                        title: 'Pease input valid number!'
+                                        title: ' Invalid Quantity!'
                     });
                 }else{
                     $('#addmedication-quantity').removeAttr('style')
@@ -577,6 +609,7 @@
                 if(num == quantityleft3){
                     $('#addmedication-quantity').removeAttr('style')
                     checkvalidation = 0;
+                    quantity = $('#addmedication-quantity').val()
                 }
                 
                 if(checkvalidation == 0)
@@ -701,11 +734,6 @@
                 //     checkvalidation = 0;
                 //     $('#editmedication-quantity').removeAttr('style')
                 // }
-                
-                if(num == quantityleft3){
-                    $('#editmedication-quantity').removeAttr('style')
-                    checkvalidation = 0;
-                }
 
 
                 if(checkvalidation == 0)
